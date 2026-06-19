@@ -50,6 +50,12 @@ public class JwtFilter extends OncePerRequestFilter {
                     null,
                     List.of(new SimpleGrantedAuthority("ROLE_"+role))
             );
+            authentication
+                   .setDetails(
+                           new org.springframework.security.web.authentication
+                                   .WebAuthenticationDetailsSource()
+                                   .buildDetails(request)
+                   );
         //Step-7 : Tell Spring security this user is authenticated
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
