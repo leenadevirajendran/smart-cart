@@ -1,5 +1,6 @@
 package com.smartcart.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,6 +27,7 @@ public class User {
     @NotBlank
     @Column(unique = true)
     private String email;
+    @JsonIgnore
     @NotBlank
     private String password;
     @Enumerated(EnumType.STRING)
