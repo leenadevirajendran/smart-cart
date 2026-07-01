@@ -33,7 +33,8 @@ public class SecurityConfig {
                         //Anyone can access register and login
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/products/**",
-                                "/api/categories/**").permitAll()
+                                "/api/categories/**", "/api/search/**",
+                                "/api/reviews/**").permitAll()
                         //Everything else requires a valid JWT token
                         .anyRequest().authenticated()
                 )
