@@ -25,7 +25,7 @@ public class Wishlist {
     private User buyer;
 
     // Which product is wishlisted
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
