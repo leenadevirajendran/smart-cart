@@ -34,7 +34,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/products/**",
                                 "/api/categories/**", "/api/search/**",
-                                "/api/reviews/**").permitAll()
+                                "/api/reviews/**",
+                                "/api/flash-sales/active",
+                                "api/flash-sales/*/stock").permitAll()
                         //Everything else requires a valid JWT token
                         .anyRequest().authenticated()
                 )
