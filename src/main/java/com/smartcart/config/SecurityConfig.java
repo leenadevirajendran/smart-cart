@@ -32,11 +32,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         //Anyone can access register and login
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/products/**",
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/websocket-test.html").permitAll()
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,
+                                "/api/products/**",
                                 "/api/categories/**", "/api/search/**",
                                 "/api/reviews/**",
                                 "/api/flash-sales/active",
-                                "api/flash-sales/*/stock").permitAll()
+                                "/api/flash-sales/*/stock").permitAll()
                         //Everything else requires a valid JWT token
                         .anyRequest().authenticated()
                 )

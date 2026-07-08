@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartCart - Live Stock Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body style="font-family: Arial; padding: 40px;">
+<h1>🔴 Live Flash Sale Stock</h1>
+<label>Product ID: </label>
+<input type="number" id="productId" value="1" style="font-size: 18px; width: 60px;">
+<button onclick="connectAndSubscribe()" style="font-size: 18px; padding: 5px 15px;">
+  Watch Stock
+</button>
+
+<h2>Remaining Stock: <span id="stockValue" style="color: red;">--</span></h2>
+
+<div id="log" style="margin-top: 20px; font-family: monospace; color: #555;"></div>
+
+<script>
+  function log(message) {
+    document.getElementById('log').innerHTML += message + '<br>';
+  }
+
+  function connectAndSubscribe() {
+    const productId = document.getElementById('productId').value;
+
+    const socket = new SockJS('http://localhost:8080/ws');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+      log('✅ Connected: ' + frame);
+
+      stompClient.subscribe('/topic/stock/' + productId, function (message) {
+        const data = JSON.parse(message.body);
+        log('📦 Update received: ' + JSON.stringify(data));
+        document.getElementById('stockValue').innerText = data.remainingStock;
+      });
+
+      log('👀 Watching product ID: ' + productId);
+    }, function (error) {
+      log('❌ Connection error: ' + error);
+    });
+  }
+</script>
+
+
+</body>
+</html>
