@@ -74,6 +74,44 @@ public class OrderService {
         cartService.clearCart(buyerEmail);
         return savedOrder;
     }
+    // Place an order directly from a flash sale purchase
+    // No cart involved — this is a direct "Buy Now" flow
+    @Transactional
+    public Order placeFlashSaleOrder(String buyerEmail, Product product,
+                                     BigDecimal unitPrice,
+                                     String shippingAddress) {
+
+        User buyer = userRepository.findByEmail(buyerEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Double-check actual stock in DB before committing
+        // (Redis already gated the flash-sale-specific count,
+        // but this protects the real inventory number too)
+        if (product.getStockQuantity() < 1) {
+            throw new RuntimeException("Product is out of stock");
+        }
+
+        Order order = new Order();
+        order.setBuyer(buyer);
+        order.setShippingAddress(shippingAddress);
+        order.setStatus(Order.OrderStatus.PLACED);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrder(order);
+        orderItem.setProduct(product);
+        orderItem.setQuantity(1);
+        orderItem.setUnitPrice(unitPrice);
+        orderItem.setTotalPrice(unitPrice);
+
+        order.getOrderItems().add(orderItem);
+        order.setTotalAmount(unitPrice);
+
+        // Reduce real product stock
+        product.setStockQuantity(product.getStockQuantity() - 1);
+        productRepository.save(product);
+
+        return orderRepository.save(order);
+    }
 
     //Get All orders for a buyer
     public List<Order> getBuyerOrders(String buyerEmail){

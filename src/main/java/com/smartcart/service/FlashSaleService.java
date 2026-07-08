@@ -1,9 +1,12 @@
 package com.smartcart.service;
 
 import com.smartcart.model.FlashSale;
+import com.smartcart.model.Order;
 import com.smartcart.model.Product;
 import com.smartcart.repository.FlashSaleRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FlashSaleService {
+    private final OrderService orderService;
     private final FlashSaleRepository flashSaleRepository;
     private final ProductService productService;
     private final RedisTemplate<String,Object> redisTemplate;
@@ -63,10 +67,11 @@ public class FlashSaleService {
         return stock != null ? Integer.parseInt(stock.toString()):0;
     }
 
-    // THE CORE LOGIC — atomic stock decrement
-    // Returns true if the buyer successfully grabbed a unit,
-    // false if sold out
-    public boolean attemptPurchase(Long flashSaleId){
+    // THE CORE LOGIC — atomic stock decrement + real order creation
+    // Returns the created Order if successful, throws idf sold out
+
+    @Transactional
+    public Order attemptPurchase(Long flashSaleId, String buyerEmail,String shippingAddress){
         FlashSale flashSale = flashSaleRepository.findById(flashSaleId)
                 .orElseThrow(()->new RuntimeException("Flash Sale  not Found"));
 
@@ -88,8 +93,16 @@ public class FlashSaleService {
             // Stock already at 0 or below — sold out
             // We put it back since this request didn't actually get a unit
             redisTemplate.opsForValue().increment(stockKey(flashSaleId));
-            return false;
+            throw new RuntimeException("Sold Out! Better luck next time.");
         }
+
+        //Redis says we got a unit - now create the real Order
+        Order order = orderService.placeFlashSaleOrder(
+                buyerEmail,
+                flashSale.getProduct(),
+                flashSale.getFlashPrice(),
+                shippingAddress
+        );
 
         // Successfully grabbed a unit — broadcast the new count
         // to every connected browser via WebSocket
@@ -97,7 +110,7 @@ public class FlashSaleService {
                 flashSale.getProduct().getId(),remaining
         );
 
-        return true;
+        return order;
     }
 
 
