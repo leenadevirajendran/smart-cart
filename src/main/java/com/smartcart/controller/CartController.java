@@ -44,6 +44,15 @@ public class CartController {
         return ResponseEntity.ok(cartService.removeCart(getCurrentUserEmail(),cartItemId));
     }
 
+    // Update quantity of a specific cart item
+    @PutMapping("/update/{cartItemId}")
+    @PreAuthorize("hasRole('BUYER')")
+    public ResponseEntity<Cart> updateQuantity(
+            @PathVariable Long cartItemId,
+            @RequestParam Integer quantity) {
+        return ResponseEntity.ok(cartService.updateQuantity(getCurrentUserEmail(), cartItemId, quantity));
+    }
+
     //Clear entire cart
     @DeleteMapping("/clear")
     @PreAuthorize("hasRole('BUYER')")

@@ -1,5 +1,6 @@
 package com.smartcart.controller;
 
+import com.smartcart.dto.OrderStatusUpdateRequest;
 import com.smartcart.model.Order;
 import com.smartcart.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -45,18 +46,19 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(orderId,getCurrentUserEmail()));
     }
     // Seller updates order status
-    @PutMapping
+    @PutMapping("/{orderId}/status")
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long orderId , Order.OrderStatus status){
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId,status,getCurrentUserEmail()));
+    public ResponseEntity<Order> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestBody OrderStatusUpdateRequest request){
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, request.getStatus(), getCurrentUserEmail()));
     }
 
     // Seller views orders containing their products
-    @GetMapping
+    @GetMapping("/seller/all")
     @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<List<Order>> getSellerOrders(){
         return ResponseEntity.ok(orderService.getSellerOrders(getCurrentUserEmail()));
     }
-
 
 }

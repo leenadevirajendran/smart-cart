@@ -80,6 +80,22 @@ public class CartService {
         return getOrCreateCart(buyerEmail);
     }
 
+    // Update the quantity of a specific cart item
+    public Cart updateQuantity(String buyerEmail, Long cartItemId, Integer quantity) {
+        Cart cart = getOrCreateCart(buyerEmail);
+
+        CartItem item = cart.getItems().stream()
+                .filter(i -> i.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+
+        if (quantity < 1) {
+            throw new RuntimeException("Quantity must be at least 1");
+        }
+
+        item.setQuantity(quantity);
+        return cartRepository.save(cart);
+    }
 
 
 
