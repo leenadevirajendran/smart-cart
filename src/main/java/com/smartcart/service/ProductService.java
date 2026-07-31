@@ -5,14 +5,13 @@ import com.smartcart.model.Product;
 import com.smartcart.model.User;
 import com.smartcart.repository.ProductRepository;
 import com.smartcart.repository.UserRepository;
-import jakarta.persistence.Id;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+import com.smartcart.repository.ProductSpecification;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +70,25 @@ public class ProductService {
                 .findByNameContainingIgnoreCaseAndActiveTrue(keyword);
     }
 
+    //Advanced filter: keyword + category + price range + sort, using JPA Specifications
+    public List<Product> filterProducts(String keyword, Long categoryId, BigDecimal minPrice,
+                                        BigDecimal maxPrice, String sortBy) {
+
+        Specification<Product> spec = ProductSpecification.isActive()
+                .and(ProductSpecification.hasKeyword(keyword))
+                .and(ProductSpecification.hasCategory(categoryId))
+                .and(ProductSpecification.minPrice(minPrice))
+                .and(ProductSpecification.maxPrice(maxPrice));
+
+        Sort sort = switch (sortBy) {
+            case "price_asc" -> Sort.by("price").ascending();
+            case "price_desc" -> Sort.by("price").descending();
+            case "newest" -> Sort.by("createdAt").descending();
+            default -> Sort.by("createdAt").descending();
+        };
+
+        return productRepository.findAll(spec, sort);
+    }
     //Update product - Only the Seller who owns it can update
     public Product updateProduct(Long id, String name, String description, BigDecimal price,
                                  Integer stockQuantity, Long categoryId, String sellerEmail){
@@ -102,6 +120,8 @@ public class ProductService {
        product.setActive(false);
        productRepository.save(product);
     }
+
+
 
 
 

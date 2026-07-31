@@ -47,11 +47,11 @@ function SellerOrders() {
     }
   };
 
-  if (loading) return <div className="px-8 py-12 text-gray-500">Loading orders...</div>;
+  if (loading) return <div className="px-8 py-12 text-gray-500 bg-paper min-h-[calc(100vh-73px)]">Loading orders...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900">Seller Orders</h1>
+    <div className="max-w-3xl mx-auto px-8 py-12 bg-paper min-h-[calc(100vh-73px)]">
+      <h1 className="font-display text-3xl font-bold text-gray-900">Seller Orders</h1>
       <p className="text-gray-500 mt-1 mb-6">Manage orders containing your products</p>
 
       {error && (
@@ -75,14 +75,14 @@ function SellerOrders() {
               {order.orderItems.map((item) => (
                 <div key={item.id} className="flex justify-between py-2 text-sm text-gray-700">
                   <span>Qty: {item.quantity}</span>
-                  <span>₹{item.totalPrice}</span>
+                  <span className="font-price">₹{item.totalPrice}</span>
                 </div>
               ))}
             </div>
 
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-600">{order.shippingAddress}</p>
-              <p className="text-lg font-bold text-indigo-600">₹{order.totalAmount}</p>
+              <p className="font-price text-lg font-bold text-cobalt">₹{order.totalAmount}</p>
             </div>
 
             <div className="mt-4 flex items-center gap-3">

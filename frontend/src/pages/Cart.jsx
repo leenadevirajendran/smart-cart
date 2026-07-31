@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCart, removeFromCart, updateCartItemQuantity } from '../services/cartService';
 import { placeOrder } from '../services/orderService.js';
+import { getProductColor, getProductInitial } from '../utils/productImage';
 
 function Cart() {
   const [cart, setCart] = useState(null);
@@ -61,7 +62,7 @@ function Cart() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-gray-50">
+      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-paper">
         <p className="text-gray-500">Loading cart...</p>
       </div>
     );
@@ -69,7 +70,7 @@ function Cart() {
 
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
-      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-gray-50">
+      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-paper">
         <div className="text-center">
           <p className="text-gray-500 text-lg mb-2">Your cart is empty</p>
           <p className="text-gray-400 text-sm">Browse products and add something you like!</p>
@@ -84,9 +85,9 @@ function Cart() {
   );
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-gray-50 px-8 py-10">
+    <div className="min-h-[calc(100vh-73px)] bg-paper px-8 py-10">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Cart</h1>
+        <h1 className="font-display text-3xl font-bold text-gray-800 mb-2">Your Cart</h1>
         <p className="text-gray-500 mb-6">Review your items before checking out</p>
 
         {message && (
@@ -97,12 +98,35 @@ function Cart() {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100 mb-6">
           {cart.items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between p-5">
-              <div>
+            <div key={item.id} className="flex items-center gap-4 p-5">
+              <div
+                className="w-14 h-14 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center"
+                style={{ backgroundColor: item.product ? `${getProductColor(item.product)}1A` : '#F3F4F6' }}
+              >
+                {item.product?.imageUrl ? (
+                  <img
+                    src={item.product.imageUrl}
+                    alt={item.product.name}
+                    className="w-full h-full object-contain"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                  />
+                ) : null}
+                <span
+                  className="font-display font-bold text-lg"
+                  style={{
+                    display: item.product?.imageUrl ? 'none' : 'flex',
+                    color: item.product ? getProductColor(item.product) : '#9CA3AF',
+                  }}
+                >
+                  {item.product ? getProductInitial(item.product) : '?'}
+                </span>
+              </div>
+
+              <div className="flex-1">
                 <h3 className="font-semibold text-gray-800">
                   {item.product ? item.product.name : 'Unknown product'}
                 </h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="font-price text-sm text-gray-500 mt-1">
                   ₹{item.unitPrice} × {item.quantity}
                 </p>
               </div>
@@ -137,7 +161,7 @@ function Cart() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="flex justify-between items-center mb-6">
             <span className="text-gray-600">Total</span>
-            <span className="text-2xl font-bold text-indigo-600">₹{total.toFixed(2)}</span>
+            <span className="font-price text-2xl font-bold text-cobalt">₹{total.toFixed(2)}</span>
           </div>
 
           <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Address</label>
@@ -146,12 +170,12 @@ function Cart() {
             value={shippingAddress}
             onChange={(e) => setShippingAddress(e.target.value)}
             placeholder="Enter your full shipping address"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-cobalt focus:border-transparent"
           />
 
           <button
             onClick={handlePlaceOrder}
-            className="w-full py-3 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors"
+            className="w-full py-3 rounded-lg bg-cobalt text-white font-medium hover:bg-cobalt-dark transition-colors"
           >
             Place Order
           </button>

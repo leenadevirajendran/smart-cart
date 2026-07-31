@@ -46,7 +46,9 @@ public class SecurityConfig {
                                 "/api/categories/**", "/api/search/**",
                                 "/api/reviews/**",
                                 "/api/flash-sales/active",
-                                "/api/flash-sales/*/stock").permitAll()
+                                "/api/flash-sales/*/stock",
+                                "/api/recommendations/trending",
+                                "/api/recommendations/related/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Use stateless sessions — no server-side session storage

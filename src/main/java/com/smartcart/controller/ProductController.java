@@ -12,7 +12,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/products")
@@ -93,6 +95,17 @@ public class ProductController {
                 getLoggedInEmail()
         );
         return ResponseEntity.ok(product);
+    }
+
+    //Advanced filter: keyword + category + price range + sort
+    @GetMapping("/filter")
+    public ResponseEntity<List<Product>> filterProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false, defaultValue = "newest") String sortBy) {
+        return ResponseEntity.ok(productService.filterProducts(keyword, categoryId, minPrice, maxPrice, sortBy));
     }
 
     //Only Seller can delete their product

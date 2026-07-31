@@ -25,7 +25,7 @@ public class Review {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id")
-    private User buyer;
+   private User buyer;
 
     //Many reviews belong to one product
     @JsonIgnore
@@ -52,7 +52,7 @@ public class Review {
     }
 
     // Expose buyer name without exposing full User object
-    private String getBuyerName(){
+     public String getBuyerName(){
         return buyer != null ? buyer.getName() : null;
     }
 

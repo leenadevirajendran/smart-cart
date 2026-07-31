@@ -39,7 +39,7 @@ public class Product {
 
     private boolean active=true;
 
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;

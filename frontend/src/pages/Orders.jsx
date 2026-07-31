@@ -30,7 +30,7 @@ function Orders() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-gray-50">
+      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-paper">
         <p className="text-gray-500">Loading orders...</p>
       </div>
     );
@@ -38,7 +38,7 @@ function Orders() {
 
   if (orders.length === 0) {
     return (
-      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-gray-50">
+      <div className="min-h-[calc(100vh-73px)] flex items-center justify-center bg-paper">
         <div className="text-center">
           <p className="text-gray-500 text-lg mb-2">No orders yet</p>
           <p className="text-gray-400 text-sm">Your order history will show up here</p>
@@ -48,9 +48,9 @@ function Orders() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-gray-50 px-8 py-10">
+    <div className="min-h-[calc(100vh-73px)] bg-paper px-8 py-10">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Orders</h1>
+        <h1 className="font-display text-3xl font-bold text-gray-800 mb-2">Your Orders</h1>
         <p className="text-gray-500 mb-6">Track and review your past purchases</p>
 
         <div className="space-y-4">
@@ -82,15 +82,15 @@ function Orders() {
               <div className="divide-y divide-gray-100 border-t border-gray-100 pt-3">
                 {order.orderItems.map((item) => (
                   <div key={item.id} className="flex justify-between py-2 text-sm">
-                    <span className="text-gray-600">Qty: {item.quantity}</span>
-                    <span className="text-gray-800 font-medium">₹{item.totalPrice}</span>
+                   <span className="text-gray-600">{item.product?.name || 'Product'} × {item.quantity}</span>
+                    <span className="font-price text-gray-800 font-medium">₹{item.totalPrice}</span>
                   </div>
                 ))}
               </div>
 
               <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
                 <span className="text-sm text-gray-500">{order.shippingAddress}</span>
-                <span className="text-lg font-bold text-indigo-600">₹{order.totalAmount}</span>
+                <span className="font-price text-lg font-bold text-cobalt">₹{order.totalAmount}</span>
               </div>
             </div>
           ))}

@@ -18,3 +18,10 @@ export const getUserRole = () => {
 
 export const isSeller = () => getUserRole() === 'SELLER';
 export const isBuyer = () => getUserRole() === 'BUYER';
+
+export const getUserEmail = () => {
+  const payload = getTokenPayload();
+  return payload?.sub || null;
+};
+
+export const isAdmin = () => getUserRole() === 'ADMIN';

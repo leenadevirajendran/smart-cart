@@ -26,7 +26,7 @@ public class OrderItem {
 
 
     // Snapshot of the product at time of purchase
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
