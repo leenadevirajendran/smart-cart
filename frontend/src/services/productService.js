@@ -54,3 +54,27 @@ export const getPersonalizedProducts = async (limit = 8) => {
   const response = await api.get(`/recommendations/for-you?limit=${limit}`);
   return response.data;
 };
+
+// Seller: create a new product
+export const createProduct = async (data) => {
+  const response = await api.post('/products', data);
+  return response.data;
+};
+
+// Seller: update their own product
+export const updateProduct = async (id, data) => {
+  const response = await api.put(`/products/${id}`, data);
+  return response.data;
+};
+
+// Seller: delete their own product
+export const deleteProduct = async (id) => {
+  const response = await api.delete(`/products/${id}`);
+  return response.data;
+};
+
+// Seller: get only their own products
+export const getMyProducts = async () => {
+  const response = await api.get('/products/myproducts');
+  return response.data;
+};

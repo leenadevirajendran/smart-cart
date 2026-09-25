@@ -13,11 +13,15 @@ import FlashSales from './pages/FlashSales';
 import ProductDetail from './pages/ProductDetail';
 import Profile from './pages/Profile';
 import AdminCategories from './pages/AdminCategories';
+import AddEditProduct from './pages/AddEditProduct';
+import MyProducts from './pages/MyProducts';
+import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
+     <ToastProvider>
     <BrowserRouter>
-      <Navbar />
+     <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -45,8 +49,33 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route
+  path="/seller/products"
+  element={
+    <ProtectedRoute allowedRole="SELLER">
+      <MyProducts />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/seller/products/new"
+  element={
+    <ProtectedRoute allowedRole="SELLER">
+      <AddEditProduct />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/seller/products/:id/edit"
+  element={
+    <ProtectedRoute allowedRole="SELLER">
+      <AddEditProduct />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </BrowserRouter>
+    </ToastProvider>
   );
 }
 

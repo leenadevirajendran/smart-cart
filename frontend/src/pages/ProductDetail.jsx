@@ -6,6 +6,8 @@ import { addToWishlist } from '../services/wishlistService';
 import { getProductReviews, getReviewSummary, addReview } from '../services/reviewService';
 import { getProductColor, getProductInitial } from '../utils/productImage';
 import { getRelatedProducts } from '../services/productService';
+import { isSeller, isAdmin } from '../utils/auth';
+import { useToast } from '../context/ToastContext';
 
 function ProductDetail() {
   const { id } = useParams();
@@ -19,6 +21,8 @@ function ProductDetail() {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [related, setRelated] = useState([]);
+  const hideBuyerActions = isSeller() || isAdmin();
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchAll();
@@ -45,24 +49,22 @@ const fetchAll = async () => {
 };
 
   const handleAddToCart = async () => {
-    try {
-      await addToCart(id, 1);
-      setMessage('Added to cart!');
-      setTimeout(() => setMessage(''), 2000);
-    } catch (err) {
-      setMessage('Failed to add to cart. Are you logged in as a Buyer?');
-    }
-  };
+  try {
+    await addToCart(id, 1);
+    showToast('Added to cart!');
+  } catch (err) {
+    showToast('Failed to add to cart. Are you logged in as a Buyer?', 'error');
+  }
+};
 
-  const handleAddToWishlist = async () => {
-    try {
-      await addToWishlist(id);
-      setMessage('Added to wishlist!');
-      setTimeout(() => setMessage(''), 2000);
-    } catch (err) {
-      setMessage('Failed to add to wishlist.');
-    }
-  };
+const handleAddToWishlist = async () => {
+  try {
+    await addToWishlist(id);
+    showToast('Added to wishlist!');
+  } catch (err) {
+    showToast('Failed to add to wishlist.', 'error');
+  }
+};
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
@@ -154,18 +156,16 @@ const fetchAll = async () => {
             </div>
 
             <div className="flex gap-3 mt-auto">
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 px-4 py-2.5 bg-cobalt text-white rounded-lg text-sm font-medium hover:bg-cobalt-dark transition-colors"
-              >
-                Add to Cart
-              </button>
-              <button
-                onClick={handleAddToWishlist}
-                className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-              >
-                ♡ Wishlist
-              </button>
+              {!hideBuyerActions && (
+  <>
+    <button onClick={() => handleAddToCart(product.id)} className="w-full py-2 rounded-lg bg-cobalt text-white text-sm font-medium hover:bg-cobalt-dark transition-colors">
+      Add to Cart
+    </button>
+    <button onClick={() => handleAddToWishlist(product.id)} className="w-full mt-2 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+      ♡ Add to Wishlist
+    </button>
+  </>
+)}
             </div>
           </div>
         </div>

@@ -22,9 +22,20 @@ function Navbar() {
         {token ? (
           <>
             <Link to="/products" className="hover:text-white transition-colors">Products</Link>
-            {sellerView ? (
-              <Link to="/seller/orders" className="hover:text-white transition-colors">Seller Orders</Link>
-            ) : (
+
+            {sellerView && (
+              <>
+                <Link to="/seller/products/new" className="hover:text-white transition-colors">Add Product</Link>
+                <Link to="/seller/products" className="hover:text-white transition-colors">My Products</Link>
+                <Link to="/seller/orders" className="hover:text-white transition-colors">Seller Orders</Link>
+              </>
+            )}
+
+            {adminView && (
+              <Link to="/admin/categories" className="hover:text-white transition-colors">Manage Categories</Link>
+            )}
+
+            {!sellerView && !adminView && (
               <>
                 <Link to="/cart" className="hover:text-white transition-colors">Cart</Link>
                 <Link to="/orders" className="hover:text-white transition-colors">Orders</Link>
@@ -35,9 +46,7 @@ function Navbar() {
                 </Link>
               </>
             )}
-            {adminView && (
-              <Link to="/admin/categories" className="hover:text-white transition-colors">Manage Categories</Link>
-            )}
+
             <Link
               to="/profile"
               className="w-8 h-8 rounded-full bg-cobalt/20 flex items-center justify-center hover:bg-cobalt/30 transition-colors"
