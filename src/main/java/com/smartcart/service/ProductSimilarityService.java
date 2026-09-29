@@ -34,38 +34,88 @@ public class ProductSimilarityService {
     /** Returns the `limit` products most similar to `productId`, most similar first. */
     public List<Product> getSimilarProducts(Long productId, int limit) {
         List<Product> activeProducts = productRepository.findByActiveTrue();
+        Map<Long, Map<String, Double>> vectors = buildTfIdfVectors(activeProducts);
 
-        Product target = activeProducts.stream()
-                .filter(p -> p.getId().equals(productId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        if (!vectors.containsKey(productId)) {
+            throw new RuntimeException("Product not found");
+        }
+        Map<String, Double> targetVector = vectors.get(productId);
 
-        // Step 1: turn every product into a list of cleaned tokens
+        return rankBySimilarity(activeProducts, vectors, targetVector, Set.of(productId), limit);
+    }
+
+    /**
+     * Builds a "taste profile" by averaging the TF-IDF vectors of every product
+     * the buyer has purchased, then ranks the rest of the catalog against that
+     * blended vector. Returns an empty list if the buyer has no purchase history
+     * with usable text (caller should fall back to trending in that case).
+     */
+    public List<Product> getPersonalizedSimilarProducts(List<Long> purchasedProductIds, int limit) {
+        if (purchasedProductIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Product> activeProducts = productRepository.findByActiveTrue();
+        Map<Long, Map<String, Double>> vectors = buildTfIdfVectors(activeProducts);
+
+        List<Map<String, Double>> purchasedVectors = purchasedProductIds.stream()
+                .map(vectors::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (purchasedVectors.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, Double> profileVector = averageVectors(purchasedVectors);
+        Set<Long> exclude = new HashSet<>(purchasedProductIds);
+
+        return rankBySimilarity(activeProducts, vectors, profileVector, exclude, limit);
+    }
+
+    /** Turns a catalog of products into their TF-IDF vectors, keyed by product id. */
+    private Map<Long, Map<String, Double>> buildTfIdfVectors(List<Product> activeProducts) {
         Map<Long, List<String>> tokensByProduct = new HashMap<>();
         for (Product p : activeProducts) {
             tokensByProduct.put(p.getId(), tokenize(buildDocument(p)));
         }
 
-        // Step 2: compute IDF for every term across the whole catalog
         Map<String, Double> idf = computeIdf(tokensByProduct);
 
-        // Step 3: compute a TF-IDF vector for every product
         Map<Long, Map<String, Double>> vectors = new HashMap<>();
         for (Map.Entry<Long, List<String>> entry : tokensByProduct.entrySet()) {
             vectors.put(entry.getKey(), computeTfIdfVector(entry.getValue(), idf));
         }
+        return vectors;
+    }
 
-        // Step 4: rank every other product by cosine similarity to the target
-        Map<String, Double> targetVector = vectors.get(productId);
+    /** Ranks products by cosine similarity to `referenceVector`, excluding a set of ids. */
+    private List<Product> rankBySimilarity(
+            List<Product> candidates,
+            Map<Long, Map<String, Double>> vectors,
+            Map<String, Double> referenceVector,
+            Set<Long> excludeIds,
+            int limit) {
 
-        return activeProducts.stream()
-                .filter(p -> !p.getId().equals(productId))
+        return candidates.stream()
+                .filter(p -> !excludeIds.contains(p.getId()))
                 .sorted((a, b) -> Double.compare(
-                        cosineSimilarity(targetVector, vectors.get(b.getId())),
-                        cosineSimilarity(targetVector, vectors.get(a.getId()))
+                        cosineSimilarity(referenceVector, vectors.get(b.getId())),
+                        cosineSimilarity(referenceVector, vectors.get(a.getId()))
                 ))
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    /** Averages several TF-IDF vectors into one blended "profile" vector. */
+    private Map<String, Double> averageVectors(List<Map<String, Double>> vectors) {
+        Map<String, Double> sum = new HashMap<>();
+        for (Map<String, Double> vector : vectors) {
+            vector.forEach((term, weight) -> sum.merge(term, weight, Double::sum));
+        }
+        int count = vectors.size();
+        sum.replaceAll((term, total) -> total / count);
+        return sum;
     }
 
     private String buildDocument(Product p) {

@@ -16,6 +16,7 @@ public class RecommendationService {
 
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
+    private final ProductSimilarityService productSimilarityService;
 
     // Trending: most-sold products overall, by total quantity
     public List<Product> getTrendingProducts(int limit) {
@@ -34,21 +35,18 @@ public class RecommendationService {
                 .collect(Collectors.toList());
     }
 
-    // Personalized: products from categories this buyer has purchased before,
-    // excluding products they already own. Falls back to trending for new buyers.
+    // Personalized: ranks the catalog against a TF-IDF "taste profile" built by
+    // averaging the vectors of everything this buyer has purchased before.
+    // Falls back to trending for buyers with no usable purchase history.
     public List<Product> getPersonalizedRecommendations(String buyerEmail, int limit) {
-        List<Long> purchasedCategoryIds = orderItemRepository.findPurchasedCategoryIdsByBuyer(buyerEmail);
         List<Long> purchasedProductIds = orderItemRepository.findPurchasedProductIdsByBuyer(buyerEmail);
 
-        if (purchasedCategoryIds.isEmpty()) {
+        List<Product> personalized = productSimilarityService
+                .getPersonalizedSimilarProducts(purchasedProductIds, limit);
+
+        if (personalized.isEmpty()) {
             return getTrendingProducts(limit);
         }
-
-        return purchasedCategoryIds.stream()
-                .flatMap(catId -> productRepository.findByCategoryId(catId).stream())
-                .filter(p -> p.isActive() && !purchasedProductIds.contains(p.getId()))
-                .distinct()
-                .limit(limit)
-                .collect(Collectors.toList());
+        return personalized;
     }
 }
