@@ -49,6 +49,12 @@ export const getRelatedProducts = async (productId, limit = 4) => {
   return response.data;
 };
 
+// Similar products — content-based (TF-IDF + cosine similarity on name/description/category)
+export const getSimilarProducts = async (productId, limit = 4) => {
+  const response = await api.get(`/recommendations/similar/${productId}?limit=${limit}`);
+  return response.data;
+};
+
 // Personalized recommendations — requires the buyer to be logged in
 export const getPersonalizedProducts = async (limit = 8) => {
   const response = await api.get(`/recommendations/for-you?limit=${limit}`);

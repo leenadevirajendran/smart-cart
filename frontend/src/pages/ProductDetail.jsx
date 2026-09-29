@@ -5,7 +5,7 @@ import { addToCart } from '../services/cartService';
 import { addToWishlist } from '../services/wishlistService';
 import { getProductReviews, getReviewSummary, addReview } from '../services/reviewService';
 import { getProductColor, getProductInitial } from '../utils/productImage';
-import { getRelatedProducts } from '../services/productService';
+import { getSimilarProducts } from '../services/productService';
 import { isSeller, isAdmin } from '../utils/auth';
 import { useToast } from '../context/ToastContext';
 
@@ -35,7 +35,7 @@ const fetchAll = async () => {
       api.get(`/products/${id}`),
       getProductReviews(id),
       getReviewSummary(id),
-      getRelatedProducts(id, 4),
+     getSimilarProducts(id, 4),
     ]);
     setProduct(productRes.data);
     setReviews(reviewsData);
