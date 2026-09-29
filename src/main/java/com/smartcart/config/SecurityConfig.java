@@ -48,8 +48,9 @@ public class SecurityConfig {
                                 "/api/flash-sales/active",
                                 "/api/flash-sales/*/stock",
                                 "/api/recommendations/trending",
-                                "/api/recommendations/related/**").permitAll()
-                        .anyRequest().authenticated()
+                                "/api/recommendations/related/**",
+                                "/api/recommendations/similar/**").permitAll().
+                        anyRequest().authenticated()
                 )
                 // Use stateless sessions — no server-side session storage
                 // JWT carries all the info, so server doesn't need to remember anything
